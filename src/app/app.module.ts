@@ -1,16 +1,44 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 
-import { AppComponent } from './app.component';
+import {AppComponent} from './app.component';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MaterialModule} from './material.module';
+import {SignupComponent} from './auth/signup/signup.component';
+import {LoginComponent} from './auth/login/login.component';
+import {TrainingComponent} from './training/training.component';
+import {CurrentTrainingComponent} from './training/current-training/current-training.component';
+import {NewTrainingComponent} from './training/new-training/new-training.component';
+import {PastTrainingComponent} from './training/past-training/past-training.component';
+import {HomeComponent} from './home/home.component';
+import {AppRoutingModule} from './app-routing.module';
+import {RouterModule} from '@angular/router';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    SignupComponent,
+    LoginComponent,
+    TrainingComponent,
+    CurrentTrainingComponent,
+    NewTrainingComponent,
+    PastTrainingComponent,
+    HomeComponent,
   ],
   imports: [
-    BrowserModule
+    RouterModule,
+    FormsModule,
+    AppRoutingModule,
+    BrowserModule,
+    BrowserAnimationsModule,
+    MaterialModule,
+    FlexLayoutModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
