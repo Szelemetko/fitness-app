@@ -1,19 +1,37 @@
 import {Exercise} from './exercise.module';
 import {Subject} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {AngularFirestore} from '@angular/fire/firestore';
 
+@Injectable()
 export class TrainingService {
-  availableExercises: Exercise[] = [
-    { id: 'crunches', name: 'Crunches', duration: 30, calories: 8 },
-    { id: 'touch-toes', name: 'Touch Toes', duration: 180, calories: 15 },
-    { id: 'side-lunges', name: 'Side Lunges', duration: 120, calories: 18 },
-    { id: 'burpees', name: 'Burpees', duration: 60, calories: 8 }
-  ];
+  availableExercises: Exercise[] = [];
+  exercisesChanged = new Subject<Exercise[]>();
   exerciseChanged = new Subject<Exercise>();
   private currentExercise: Exercise;
   private completedExercises = [];
 
-  getAvailableExercises(): Exercise[] {
-    return this.availableExercises.slice();
+  constructor (private db: AngularFirestore) {};
+
+  fetchAvailableExercises() {
+    this.db
+      .collection('availableExcercises')
+      .snapshotChanges()
+      .pipe(
+        map(docArray => {
+          return docArray.map(doc => {
+            return {
+              id: doc.payload.doc.id,
+              ...doc.payload.doc.data()
+            };
+          });
+        })
+      )
+      .subscribe((exercises: Exercise[]) => {
+        this.availableExercises = exercises;
+        this.exercisesChanged.next([...this.availableExercises]);
+      });
   }
 
   startExercise(selectedId: string): void {
@@ -24,7 +42,7 @@ export class TrainingService {
   }
 
   completeExercise(): void {
-    this.completedExercises.push({
+    this.addDataToDatabase({
       ...this.currentExercise,
       date: new Date(),
       state: 'completed'});
@@ -33,7 +51,7 @@ export class TrainingService {
   }
 
   cancelExercise(progress: number): void {
-    this.completedExercises.push({
+    this.addDataToDatabase({
       ...this.currentExercise,
       duration: this.currentExercise.duration * (progress / 100),
       calories: this.currentExercise.calories * (progress / 100),
@@ -49,5 +67,9 @@ export class TrainingService {
 
   getCompletedExercises(): Exercise[] {
     return this.completedExercises.slice();
+  }
+
+  private addDataToDatabase(exercise: Exercise) {
+    this.db.collection('pastExercises').add(exercise);
   }
 }
