@@ -13,7 +13,7 @@ import {
   MatOptionModule,
   MatProgressSpinnerModule,
   MatSelectModule,
-  MatSidenavModule, MatTableModule,
+  MatSidenavModule, MatSortModule, MatTableModule,
   MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
@@ -35,7 +35,8 @@ const materialModules = [
   MatOptionModule,
   MatProgressSpinnerModule,
   MatDialogModule,
-  MatTableModule
+  MatTableModule,
+  MatSortModule
 ];
 
 @NgModule({
