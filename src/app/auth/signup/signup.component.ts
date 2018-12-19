@@ -10,8 +10,8 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./signup.component.css']
 })
 export class SignupComponent implements OnInit, OnDestroy {
-  private maxDate: Date;
-  private isLoading = false;
+  maxDate: Date;
+  isLoading = false;
   private loadingSub: Subscription;
 
   constructor(private authService: AuthService,

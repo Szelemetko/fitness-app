@@ -17,6 +17,8 @@ import {AngularFirestoreModule} from '@angular/fire/firestore';
 import {UiService} from './shared/ui.service';
 import {AuthModule} from './auth/auth.module';
 import {SharedModule} from './shared/shared.module';
+import {StoreModule} from '@ngrx/store';
+import {reducers} from './app.reducer';
 
 @NgModule({
   declarations: [
@@ -34,7 +36,8 @@ import {SharedModule} from './shared/shared.module';
     BrowserModule,
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule
+    AngularFirestoreModule,
+    StoreModule.forRoot(reducers)
   ],
   providers: [AuthService, AuthGuard, TrainingService, UiService],
   bootstrap: [AppComponent]

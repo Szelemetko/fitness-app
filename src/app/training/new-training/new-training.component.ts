@@ -12,7 +12,7 @@ import {UiService} from '../../shared/ui.service';
 })
 export class NewTrainingComponent implements OnInit, OnDestroy {
 
-  private isLoading = false;
+  isLoading = false;
   private exercises: Exercise[];
   private exerciseSubscription: Subscription;
   private loadingSubscription: Subscription;
