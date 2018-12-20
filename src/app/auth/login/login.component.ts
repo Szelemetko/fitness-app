@@ -1,7 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {AuthService} from '../auth.service';
-import {UiService} from '../../shared/ui.service';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 
@@ -19,7 +18,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
 
   constructor(private authService: AuthService,
-              private uiService: UiService,
               private store: Store<fromRoot.State>) {
   }
 

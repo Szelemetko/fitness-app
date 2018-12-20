@@ -1,27 +1,27 @@
 import {Exercise} from './exercise.module';
-import {Subject, Subscription} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
+import {map, take} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
 import {UiService} from '../shared/ui.service';
+import {Store} from '@ngrx/store';
+import * as UI from '../shared/ui.actions';
+import * as Training from './training.actions';
+
+import * as fromTraining from './training.reducer';
 
 @Injectable()
 export class TrainingService {
 
-  exercisesChanged = new Subject<Exercise[]>();
-  exerciseChanged = new Subject<Exercise>();
-  finishedExercisesChanged = new Subject<Exercise[]>();
-
-  private availableExercises: Exercise[] = [];
-  private currentExercise: Exercise;
-
   private fbSubs: Subscription[] = [];
 
-  constructor(private db: AngularFirestore, private uiService: UiService) {
+  constructor(private db: AngularFirestore,
+              private uiService: UiService,
+              private store: Store<fromTraining.State>) {
   }
 
   fetchAvailableExercises() {
-    this.uiService.loadingStateChanged.next(true);
+    this.store.dispatch(new UI.StartLoading());
     this.fbSubs.push(
       this.db
         .collection('availableExcercises')
@@ -38,56 +38,55 @@ export class TrainingService {
             })
         )
         .subscribe((exercises: Exercise[]) => {
-          this.uiService.loadingStateChanged.next(false);
-          this.availableExercises = exercises;
-          this.exercisesChanged.next([...this.availableExercises]);
+          this.store.dispatch(new Training.SetAvailableTrainings(exercises));
+          this.store.dispatch(new UI.StopLoading());
         }, error => {
-          this.uiService.loadingStateChanged.next(false);
+          this.store.dispatch(new UI.StopLoading());
           this.uiService.showSnackbar(error.message, null, 3000);
-          this.exercisesChanged.next(null);
         })
     );
   }
 
   startExercise(selectedId: string): void {
-    // this.db.doc('availableExcercises/' + selectedId).update({lastSelected: new Date()});
-    this.currentExercise = this.availableExercises.find(ex => {
-      return ex.id === selectedId;
-    });
-    this.exerciseChanged.next({...this.currentExercise});
+    this.store.dispatch(new Training.StartTraining(selectedId));
   }
 
   completeExercise(): void {
-    this.addDataToDatabase({
-      ...this.currentExercise,
-      date: new Date(),
-      state: 'completed'
-    });
-    this.currentExercise = null;
-    this.exerciseChanged.next(null);
+    this.store.select(fromTraining.getActiveExercise).pipe(take(1))
+      .subscribe(
+      ex => {
+        this.addDataToDatabase({
+          ...ex,
+          date: new Date(),
+          state: 'completed'
+        });
+        this.store.dispatch(new Training.StopTraining());
+      }
+    );
   }
 
   cancelExercise(progress: number): void {
-    this.addDataToDatabase({
-      ...this.currentExercise,
-      duration: this.currentExercise.duration * (progress / 100),
-      calories: this.currentExercise.calories * (progress / 100),
-      date: new Date(),
-      state: 'cancelled'
-    });
-    this.currentExercise = null;
-    this.exerciseChanged.next(null);
-  }
+    this.store.select(fromTraining.getActiveExercise).pipe(take(1))
+      .subscribe(
+      ex => {
+        this.addDataToDatabase({
+          ...ex,
+          duration: ex.duration * (progress / 100),
+          calories: ex.calories * (progress / 100),
+          date: new Date(),
+          state: 'cancelled'
+        });
+        this.store.dispatch(new Training.StopTraining());
+      }
+    );
 
-  getCurrentExercise(): Exercise {
-    return {...this.currentExercise};
   }
 
   fetchFinishedExercises() {
     this.fbSubs.push(
       this.db.collection('pastExercises').valueChanges().subscribe(
         (exercises: Exercise[]) => {
-          this.finishedExercisesChanged.next(exercises);
+          this.store.dispatch(new Training.SetFinishedTrainings(exercises));
         })
     );
   }

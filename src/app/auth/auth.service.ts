@@ -13,9 +13,6 @@ import * as Auth from '../auth/auth.actions';
 
 @Injectable()
 export class AuthService {
-
-  private isAuthenticated = false;
-
   constructor(
     private router: Router,
     private afAuth: AngularFireAuth,
